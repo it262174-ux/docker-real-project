@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Docker Full Stack App</title>
+</head>
+
+<body>
+
+    <h1>Docker Full Stack Project</h1>
+
+    <p id="status">Checking API...</p>
+
+    <button onclick="getVisits()">
+        Visit API
+    </button>
+
+    <p id="visits"></p>
+
+    <script>
+        async function checkHealth() {
+            const response = await fetch('/api/health');
+            const data = await response.json();
+
+            document.getElementById('status').innerText =
+                'API Status: ' + data.status;
+        }
+
+        async function getVisits() {
+            const response = await fetch('/api/visits');
+            const data = await response.json();
+
+            document.getElementById('visits').innerText =
+                'Visits: ' + data.visits;
+        }
+
+        checkHealth();
+    </script>
+
+</body>
+</html>
