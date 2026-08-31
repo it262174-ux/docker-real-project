@@ -1,4 +1,4 @@
-name: Docker CI
+name: Docker CI/CD
 
 on:
   push:
@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout source code
         uses: actions/checkout@v6
 
@@ -31,11 +30,11 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:ci
 
+
   build-and-push-frontend:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout source code
         uses: actions/checkout@v6
 
@@ -53,12 +52,13 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:ci     
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:ci
+
+
   build-and-push-gateway:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout source code
         uses: actions/checkout@v6
 
@@ -76,19 +76,23 @@ jobs:
         with:
           context: ./nginx
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:ci     
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:ci
+
 
   deploy-to-ec2:
-  needs:
-    - build-and-push-api
-    - build-and-push-frontend
-    - build-and-push-gateway
+    needs:
+      - build-and-push-api
+      - build-and-push-frontend
+      - build-and-push-gateway
 
-  runs-on: self-hosted
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
 
-  steps:
-    - name: Deploy on EC2
-      run: |
-        cd ~/docker-real-project
-        docker compose -f compose.prod.yaml pull
-        docker compose -f compose.prod.yaml up -d
+    steps:
+      - name: Deploy on EC2
+        run: |
+          cd ~/docker-real-project
+          docker compose -f compose.prod.yaml pull
+          docker compose -f compose.prod.yaml up -d
