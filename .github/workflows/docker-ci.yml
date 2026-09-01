@@ -7,6 +7,9 @@ on:
 
 jobs:
 
+  # ==========================================
+  # 1. AUTOMATED TEST
+  # ==========================================
   test:
     runs-on: ubuntu-latest
 
@@ -29,6 +32,9 @@ jobs:
           python -m pytest test_app.py
 
 
+  # ==========================================
+  # 2. BUILD + PUSH API IMAGE
+  # ==========================================
   build-and-push-api:
     needs: test
     runs-on: ubuntu-latest
@@ -51,9 +57,12 @@ jobs:
         with:
           context: .
           push: true
-          tags:  ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:${{ github.sha }}
 
 
+  # ==========================================
+  # 3. BUILD + PUSH FRONTEND IMAGE
+  # ==========================================
   build-and-push-frontend:
     needs: test
     runs-on: ubuntu-latest
@@ -79,6 +88,9 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:${{ github.sha }}
 
 
+  # ==========================================
+  # 4. BUILD + PUSH GATEWAY IMAGE
+  # ==========================================
   build-and-push-gateway:
     needs: test
     runs-on: ubuntu-latest
@@ -104,6 +116,9 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:${{ github.sha }}
 
 
+  # ==========================================
+  # 5. DEPLOY TO EC2 + HEALTH CHECK + ROLLBACK
+  # ==========================================
   deploy-to-ec2:
     needs:
       - build-and-push-api
@@ -119,6 +134,53 @@ jobs:
       - name: Deploy on EC2
         run: |
           cd ~/docker-real-project
-          IMAGE_TAG=${{github.sha}} docker compose -f compose.prod.yaml pull
-          IMAGE_TAG=${{github.sha}} docker compose -f compose.prod.yaml up -d
-          curl --fail --silent --show-error --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8080/api/health
+
+          PREVIOUS_TAG=$(cat current_image_tag)
+
+          echo "Previous version: $PREVIOUS_TAG"
+          echo "Deploying version: ${{ github.sha }}"
+
+          # Pull new version
+          IMAGE_TAG=${{ github.sha }} docker compose -f compose.prod.yaml pull
+
+          # Deploy new version
+          IMAGE_TAG=${{ github.sha }} docker compose -f compose.prod.yaml up -d
+
+          # Check application health
+          if curl --fail --silent --show-error \
+            --retry 5 \
+            --retry-delay 3 \
+            --retry-connrefused \
+            http://localhost:8080/api/health
+          then
+
+            echo ""
+            echo "Deployment successful"
+            echo "${{ github.sha }}" > current_image_tag
+
+          else
+
+            echo ""
+            echo "Health check failed"
+            echo "Rolling back to $PREVIOUS_TAG"
+
+            # Pull previous known-good version
+            IMAGE_TAG=$PREVIOUS_TAG docker compose -f compose.prod.yaml pull
+
+            # Roll back
+            IMAGE_TAG=$PREVIOUS_TAG docker compose -f compose.prod.yaml up -d
+
+            # Verify rollback
+            curl --fail --silent --show-error \
+              --retry 5 \
+              --retry-delay 3 \
+              --retry-connrefused \
+              http://localhost:8080/api/health
+
+            echo ""
+            echo "Rollback completed"
+
+            # Keep GitHub Actions RED because new deployment failed
+            exit 1
+
+          fi
