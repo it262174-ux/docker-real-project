@@ -28,7 +28,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:${github.sha}
+          tags:  ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:${{ github.sha }}
 
 
   build-and-push-frontend:
@@ -52,7 +52,7 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:${github.sha}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:${{ github.sha }}
 
 
   build-and-push-gateway:
@@ -76,7 +76,7 @@ jobs:
         with:
           context: ./nginx
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:${github.sha}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:${{ github.sha }}
 
 
   deploy-to-ec2:
