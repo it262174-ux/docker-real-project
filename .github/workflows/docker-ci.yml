@@ -30,6 +30,7 @@ jobs:
 
 
   build-and-push-api:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -54,6 +55,7 @@ jobs:
 
 
   build-and-push-frontend:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -78,6 +80,7 @@ jobs:
 
 
   build-and-push-gateway:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
