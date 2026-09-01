@@ -148,8 +148,9 @@ jobs:
 
           # Check application health
           if curl --fail --silent --show-error \
-            --retry 5 \
+            --retry 10 \
             --retry-delay 3 \
+            --retry-all-errors \
             --retry-connrefused \
             http://localhost:8080/api/health
           then
