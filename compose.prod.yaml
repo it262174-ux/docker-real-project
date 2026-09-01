@@ -1,7 +1,7 @@
 services:
 
   nginx:
-    image: chancloud/docker-gateway:ci
+    image: chancloud/docker-gateway:${IMAGE_TAG}
 
     ports:
       - "8080:80"
@@ -15,11 +15,11 @@ services:
 
 
   frontend:
-    image: chancloud/docker-frontend:ci
+    image: chancloud/docker-frontend:${IMAGE_TAG}
 
 
   api:
-    image: chancloud/docker-api:ci
+    image: chancloud/docker-api:${IMAGE_TAG}
 
     environment:
       DB_HOST: db

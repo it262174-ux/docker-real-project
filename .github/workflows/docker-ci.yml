@@ -28,7 +28,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:ci
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-api:${github.sha}
 
 
   build-and-push-frontend:
@@ -52,7 +52,7 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:ci
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-frontend:${github.sha}
 
 
   build-and-push-gateway:
@@ -76,7 +76,7 @@ jobs:
         with:
           context: ./nginx
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:ci
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docker-gateway:${github.sha}
 
 
   deploy-to-ec2:
@@ -94,5 +94,5 @@ jobs:
       - name: Deploy on EC2
         run: |
           cd ~/docker-real-project
-          docker compose -f compose.prod.yaml pull
-          docker compose -f compose.prod.yaml up -d
+          IMAGE_TAG=${{github.sha}} docker compose -f compose.prod.yaml pull
+          IMAGE_TAG=${{github.sha}} docker compose -f compose.prod.yaml up -d
