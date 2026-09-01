@@ -121,3 +121,4 @@ jobs:
           cd ~/docker-real-project
           IMAGE_TAG=${{github.sha}} docker compose -f compose.prod.yaml pull
           IMAGE_TAG=${{github.sha}} docker compose -f compose.prod.yaml up -d
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8080/api/health
