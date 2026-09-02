@@ -140,8 +140,13 @@ jobs:
       - X64
 
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
       - name: Deploy on EC2
         run: |
+          cp "$GITHUB_WORKSPACE/compose.prod.yaml" ~/docker-real-project/compose.prod.yaml
+          
           cd ~/docker-real-project
 
           PREVIOUS_TAG=$(cat current_image_tag)
