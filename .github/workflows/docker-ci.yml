@@ -213,7 +213,7 @@ jobs:
             --retry-delay 3 \
             --retry-all-errors \
             --retry-connrefused \
-            http://localhost:8080/api/health
+            http://localhost/api/health
           then
 
             echo ""
@@ -237,7 +237,7 @@ jobs:
               --retry 5 \
               --retry-delay 3 \
               --retry-connrefused \
-              http://localhost:8080/api/health
+              http://localhost/api/health
 
             echo ""
             echo "Rollback completed"
