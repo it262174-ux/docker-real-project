@@ -4,7 +4,6 @@ services:
     image: chancloud/docker-gateway:${IMAGE_TAG}
 
     ports:
-      - "8080:80"
 
       - "80:80"
 
