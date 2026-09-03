@@ -169,6 +169,33 @@ jobs:
 
           cd ~/docker-real-project
 
+          # Load production configuration from AWS SSM Parameter Store
+          export POSTGRES_DB="$(aws ssm get-parameter \
+            --name "/docker-real-project/prod/POSTGRES_DB" \
+            --region ap-northeast-1 \
+            --query "Parameter.Value" \
+            --output text)"
+
+          export POSTGRES_USER="$(aws ssm get-parameter \
+            --name "/docker-real-project/prod/POSTGRES_USER" \
+            --region ap-northeast-1 \
+            --query "Parameter.Value" \
+            --output text)"
+
+          export POSTGRES_PASSWORD="$(aws ssm get-parameter \
+            --name "/docker-real-project/prod/POSTGRES_PASSWORD" \
+            --with-decryption \
+            --region ap-northeast-1 \
+            --query "Parameter.Value" \
+            --output text)"
+
+          # Verify variables are loaded without printing secrets
+          test -n "$POSTGRES_DB"
+          test -n "$POSTGRES_USER"
+          test -n "$POSTGRES_PASSWORD"
+
+
+
           PREVIOUS_TAG=$(cat current_image_tag)
 
           echo "Previous version: $PREVIOUS_TAG"
